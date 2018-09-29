@@ -44,16 +44,28 @@ topics,:`connected`announcement`publicNotifications
 // funding/settlement etc.
 topics,:`funding`insurance`liquidation`settlement
 
-logfile:`$":../data/BMX_msgs_",string[.z.d],".log"
-
 ////////////////////////////////////////////////////////////////////////////////
 // Initialization
 ////////////////////////////////////////////////////////////////////////////////
 
+initlog:{[path;prefix;d]
+ logfile:`$path,"/",prefix,string[d],".log";
+ if[()~key logfile;logfile set ()];
+ :@[hopen;logfile;{'`$"Failed to open logfile - ",-3!x}];
+ }
+
 // setup up logfile
-if[()~key logfile;logfile set ()];
-logh:@[hopen;logfile;{'`$"Failed to open logfile - ",-3!x}];
+currdate:.z.d
+logh:initlog[":../data";"BMX_msgs_";currdate];
 
 // subscribe
-.bmx.h:.ws.open[url;`.bmx.upd]
+.bmx.h:.ws.open[url;`.bmx.upd];
 .bmx.h .j.j `op`args!`subscribe,enlist topics;
+
+\t 1000
+.z.ts:{[x]
+ if[currdate <> d:`date$x;
+  logh::initlog[":../data";"BMX_msgs_";d];
+  currdate::d;
+  ];
+ }
