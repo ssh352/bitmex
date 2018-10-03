@@ -60,7 +60,7 @@ disconnected:{[f;x]
  }
 
 .z.wc:disconnected[`.z.wc]
-.z.pc:disconnected[`.z.wc]
+.z.pc:disconnected[`.z.pc]
 
 ////////////////////////////////////////////////////////////////////////////////
 // Initialization
