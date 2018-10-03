@@ -2,37 +2,27 @@
 .utils.loadlib["../lib/ws.q";"ws.q"]
 
 ////////////////////////////////////////////////////////////////////////////////
-// Configuration
+// Functions
 ////////////////////////////////////////////////////////////////////////////////
-
-.bmx.info:()
-.bmx.subs:()
-.bmx.tbls:()!()
-.bmx.misc:()
-
-.bmx.handlemsg:{[msg]
- if[`info in key msg;.bmx.info,:enlist msg;:()];
- if[`subscribe in key msg;.bmx.subs,:enlist msg;:()];
- if[`table in key msg;
- // tbl:`$msg`table;
- // if[not tbl in key .bmx.tbls;@[`.bmx.tbls;tbl;:;()]];
- // .bmx.tbls[tbl],:enlist enlist msg;
-  :();
-  ];
- .bmx.misc:enlist msg;
- }
 
 .bmx.upd:{[x]
  msg:.j.k[x],enlist[`rcvts]!enlist .z.p;
  @[logh;enlist (`.bmx.handlemsg;msg);{'`$"Failed to handle msg - ",-3!x}];
- .bmx.handlemsg[msg];
+ }
+
+checkconn:{[url;topics]
+ h:.ws.open[url;`.bmx.upd];
+ if[null h;:()];
+ show `$"Connected ",url," at ",(-3!.z.z);
+ h .j.j `op`args!`subscribe,enlist topics;
+ h
  }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Configuration
 ////////////////////////////////////////////////////////////////////////////////
 
-// url:"" // test stream
+//url:"wss://www.testnet.com/realtime" // test stream
 url:"wss://www.bitmex.com/realtime"
 
 // market data
@@ -43,6 +33,34 @@ topics,:`connected`announcement`publicNotifications
 
 // funding/settlement etc.
 topics,:`funding`insurance`liquidation`settlement
+
+////////////////////////////////////////////////////////////////////////////////
+// z handlers
+////////////////////////////////////////////////////////////////////////////////
+
+\t 1000
+
+.z.ts:{[x]
+ if[currdate <> d:`date$x;
+  logh::initlog[":../data";"BMX_msgs_";d];
+  currdate::d;
+  ];
+
+ if[null .bmx.h;
+  .bmx.h:checkconn[url;topics];
+ ];
+ }
+
+disconnected:{[f;x]
+ show `$" - "sv(-3!.z.p;string[f];-3!x);
+ if[x=neg .bmx.h;
+  show `$"Bitmex API disconnected at ",(-3!.z.p)," - ",-3!x;
+  .bmx.h:0N
+  ];
+ }
+
+.z.wc:disconnected[`.z.wc]
+.z.pc:disconnected[`.z.wc]
 
 ////////////////////////////////////////////////////////////////////////////////
 // Initialization
@@ -59,13 +77,4 @@ currdate:.z.d
 logh:initlog[":../data";"BMX_msgs_";currdate];
 
 // subscribe
-.bmx.h:.ws.open[url;`.bmx.upd];
-.bmx.h .j.j `op`args!`subscribe,enlist topics;
-
-\t 1000
-.z.ts:{[x]
- if[currdate <> d:`date$x;
-  logh::initlog[":../data";"BMX_msgs_";d];
-  currdate::d;
-  ];
- }
+.bmx.h:0N
