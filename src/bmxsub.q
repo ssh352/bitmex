@@ -44,6 +44,7 @@ topics,:`funding`insurance`liquidation`settlement
  if[currdate <> d:`date$x;
   logh::initlog[":../data";"BMX_msgs_";d];
   currdate::d;
+  .bmx.h:0N; // reestablish connection and trigger snapshots
   ];
 
  if[null .bmx.h;
