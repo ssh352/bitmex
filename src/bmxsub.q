@@ -13,7 +13,7 @@
 
 checkconn:{[url;topics]
  h:.ws.open[url;`.bmx.upd];
- if[null h;:()];
+ if[null h;:0N];
  show `$"Connected ",url," at ",(-3!.z.z);
  h .j.j `op`args!`subscribe,enlist topics;
  h
