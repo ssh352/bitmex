@@ -6,8 +6,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 .bmx.upd:{[x]
+ if[.bmx.h <> neg .z.w;:()]; // prevent duplicates
  msg:.j.k[x],enlist[`rcvts]!enlist .z.p;
- @[logh;enlist (`.bmx.handlemsg;msg);{'`$"Failed to handle msg - ",-3!x}];
+ @[logh;enlist (`.bmx.handlemsg;msg);{'`$"failed to handle msg - ",-3!x}];
  }
 
 checkconn:{[url;topics]
@@ -50,6 +51,10 @@ topics,:`funding`insurance`liquidation`settlement
  if[null .bmx.h;
   .bmx.h:checkconn[url;topics];
  ];
+
+ if[not null .bmx.h;
+   hclose each key[.z.W] except neg .bmx.h; // drop all conns except to ws api
+   ];
  }
 
 disconnected:{[f;x]
