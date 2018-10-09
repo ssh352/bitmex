@@ -1,7 +1,13 @@
 \c 200 200
 
-\l creds.q
 \l utils.q
+
+privatesubs:0b
+if[not () ~ key`:creds.q;
+  privatesubs:1b;
+  system"l creds.q";
+  ];
+
 .utils.loadlib["../lib/ws.q";"ws.q"]
 .utils.loadlib["../lib/cryptoq/src";"cryptoq_binary.q"]
 .utils.loadlib["../lib/cryptoq/src";"cryptoq.q"]
@@ -20,9 +26,12 @@ checkconn:{[url;topics]
  h:.ws.open[url;`.bmx.upd];
  if[null h;:0N];
  show `$"Connected ",url," at ",(-3!.z.z);
- expires:`long$10e-9 * .z.p - 1970.01.01D00:00;
- sig:""sv string .cryptoq.hmac_sha256[secret;"GET/realtime",string expires];
- h .j.j `op`args!`authKeyExpires,enlist (apikey;expires;sig);
+ if[privatesubs;
+   expires:`long$10e-9 * .z.p - 1970.01.01D00:00;
+   sig:""sv string .cryptoq.hmac_sha256[secret;"GET/realtime",string expires];
+   h .j.j `op`args!`authKeyExpires,enlist (apikey;expires;sig);
+   ];
+ show `$"subscribing to ",","sv string topics;  
  h .j.j `op`args!`subscribe,enlist topics;
  h
  }
@@ -32,20 +41,23 @@ checkconn:{[url;topics]
 ////////////////////////////////////////////////////////////////////////////////
 
 //url:"wss://www.testnet.com/realtime" // test stream
-url:"wss://www.bitmex.com/realtime"
+url:"wss://www.bitmex.com/realtime";
 
 // market data
 //topics:`orderBookL2`trade`instrument
-topics:`orderBookL2`trade`instrument
+topics:`orderBookL2`trade`instrument;
 
 // info
-topics,:`connected`announcement`publicNotifications
+topics,:`connected`announcement`publicNotifications;
 
 // funding/settlement etc.
-topics,:`funding`insurance`liquidation`settlement
+topics,:`funding`insurance`liquidation`settlement;
 
-// private feed
-topics,:`execution`order`margin`position`transact`wallet
+
+if[privatesubs;
+  // private feed
+  topics,:`execution`order`margin`position`transact`wallet;
+  ];
 
 ////////////////////////////////////////////////////////////////////////////////
 // z handlers
@@ -95,4 +107,4 @@ currdate:.z.d
 logh:initlog[":../data";"BMX_msgs_";currdate];
 
 // subscribe
-.bmx.h:0N
+.bmx.h:0N;
