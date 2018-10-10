@@ -6,8 +6,8 @@ privatesubs:0b
 if[not () ~ key`:creds.q;
   privatesubs:1b;
   system"l creds.q";
-  .utils.loadlib["../lib/cryptoq/src";"cryptoq_binary.q"]
-  .utils.loadlib["../lib/cryptoq/src";"cryptoq.q"]
+  .utils.loadlib["../lib/cryptoq/src";"cryptoq_binary.q"];
+  .utils.loadlib["../lib/cryptoq/src";"cryptoq.q"];
   ];
 
 .utils.loadlib["../lib/ws.q";"ws.q"]
