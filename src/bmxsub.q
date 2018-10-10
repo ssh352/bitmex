@@ -19,7 +19,7 @@ if[not () ~ key`:creds.q;
 .bmx.upd:{[x]
  if[.bmx.h <> neg .z.w;:()]; // prevent duplicates
  msg:.j.k[x],enlist[`rcvts]!enlist .z.p;
- @[logh;enlist (`.bmx.handlemsg;msg);{'`$"failed to handle msg - ",-3!x}];
+ @[logh;enlist (`.bmx.handlemsg;msg);{'`$"Failed to handle msg - ",-3!x}];
  }
 
 checkconn:{[url;topics]
@@ -91,6 +91,30 @@ disconnected:{[f;x]
 
 .z.wc:disconnected[`.z.wc]
 .z.pc:disconnected[`.z.pc]
+
+////////////////////////////////////////////////////////////////////////////////
+// z handlers
+////////////////////////////////////////////////////////////////////////////////
+
+\t 1000
+
+.z.ts:{[x]
+ if[currdate <> d:`date$x;
+  logh::initlog[":../data";"BMX_msgs_";d];
+  currdate::d;
+  ];
+
+ if[null .bmx.h;
+  .bmx.h:checkconn[url;topics];
+ ];
+ }
+
+.z.wc:{[x]
+ if[x=.bmx.h;
+  show `$"Disconnected at ",(-3!.z.p)," - ",-3!x;
+  .bmx.h:0N
+  ];
+ }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Initialization
