@@ -72,6 +72,10 @@ if[privatesubs;
   .bmx.h:0N; // reestablish connection and trigger snapshots
   ];
 
+ if[(not null .bmx.h) and not neg[.bmx.h] in key .z.W;
+  .bmx.h:0N;
+  ];
+  
  if[null .bmx.h;
   .bmx.h:checkconn[url;topics];
  ];
@@ -91,30 +95,6 @@ disconnected:{[f;x]
 
 .z.wc:disconnected[`.z.wc]
 .z.pc:disconnected[`.z.pc]
-
-////////////////////////////////////////////////////////////////////////////////
-// z handlers
-////////////////////////////////////////////////////////////////////////////////
-
-\t 1000
-
-.z.ts:{[x]
- if[currdate <> d:`date$x;
-  logh::initlog[":../data";"BMX_msgs_";d];
-  currdate::d;
-  ];
-
- if[null .bmx.h;
-  .bmx.h:checkconn[url;topics];
- ];
- }
-
-.z.wc:{[x]
- if[x=.bmx.h;
-  show `$"Disconnected at ",(-3!.z.p)," - ",-3!x;
-  .bmx.h:0N
-  ];
- }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Initialization
