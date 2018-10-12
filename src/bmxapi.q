@@ -53,6 +53,7 @@ restapi:{[host;verb;path;data;apiKey;apiSecret]
 // Public Functions
 ////////////////////////////////////////////////////////////////////////////////
 
+// TODO - expose other functions
 getpos:{
   r:restapi[settings`apiHost;"GET";"/api/v1/position";"";
   settings`apiKey;settings`apiSecret];
@@ -71,7 +72,11 @@ getwallet:{
   update `$currency,`$symbol,`$transactType from r`body;
   };   
 
+// TODO - required?
 //getNextClOrdID:{$[not `myClOrdID in key `.;myClOrdID::0;[myClOrdID+:1;myClOrdID]]};
+
+// TODO - factor out commonality
+// TODO - expose ordertypes and flags
 //buy             // r:b x:`XBTUSD,1,  11111f
 b:buy:ol:cs:{"b `sym,qty[,price]";
   if[0h<>type x;:`status`header`body!(-1;`;`)];
@@ -102,6 +107,7 @@ c:cancel:{"c clOrdID(j)";
   ;:r
   };  
 
+// TODO - generalise other functions to support this using cols wildcard
 od:{
   r:restapi[settings`apiHost;"GET";"/api/v1/order?reverse=true&columns=",.j.j[`clOrdID`symbol`side`orderQty`price`ordStatus`cumQty`avgPx`timestamp];"";settings`apiKey;settings`apiSecret];
   :select "J"$clOrdID,ltime"Z"$timestamp,`$symbol,`$side,orderQty,price,`$ordStatus,cumQty,avgPx from r`body;
