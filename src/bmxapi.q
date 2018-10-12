@@ -4,9 +4,9 @@
 .utils.loadlib["../lib/cryptoq/src";"cryptoq_binary.q"];
 .utils.loadlib["../lib/cryptoq/src";"cryptoq.q"];
 
-// TODO - create testnet account
-//settings:`apiHost`apiKey`apiSecret!("testnet.bitmex.com";"";"")   //testnet
-settings:`apiHost`apiKey`apiSecret!("www.bitmex.com";apikey;secret)
+// TODO - test flag on by default and print live banner
+settings:`apiHost`apiKey`apiSecret!("testnet.bitmex.com";apikey;secret)
+//settings:`apiHost`apiKey`apiSecret!("www.bitmex.com";apikey;secret)
 
 ////////////////////////////////////////////////////////////////////////////////
 // Private Functions
@@ -57,6 +57,7 @@ restapi:{[host;verb;path;data;apiKey;apiSecret]
 getpos:{
   r:restapi[settings`apiHost;"GET";"/api/v1/position";"";
   settings`apiKey;settings`apiSecret];
+  // TODO - handle empty r`body when no orders have been placed
   :update `$symbol,ltime"Z"$timestamp from r`body;
   };   
 
@@ -72,9 +73,9 @@ getwallet:{
   update `$currency,`$symbol,`$transactType from r`body;
   };   
 
-// TODO - required?
-//getNextClOrdID:{$[not `myClOrdID in key `.;myClOrdID::0;[myClOrdID+:1;myClOrdID]]};
+getNextClOrdID:{:first -1?0Ng;};
 
+// TODO - use bulk api instead
 // TODO - factor out commonality
 // TODO - expose ordertypes and flags
 //buy             // r:b x:`XBTUSD,1,  11111f
@@ -100,9 +101,8 @@ s:sell:os:cl:{"s `sym,qty[,price]";
 
 //cancel        // r: cc 5
 c:cancel:{"c clOrdID(j)";
-  if[-7h<>type x;:`status`header`body!(-1;`;`)];
   r:restapi[settings`apiHost;"DELETE";"/api/v1/order";
-  .j.j[enlist[`clOrdID]!enlist[string x]];
+  .j.j[enlist[`clOrdID]!enlist x];
   settings`apiKey;settings`apiSecret]
   ;:r
   };  
