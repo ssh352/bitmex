@@ -5,8 +5,10 @@
 .utils.loadlib["../lib/cryptoq/src";"cryptoq_binary.q"];
 .utils.loadlib["../lib/cryptoq/src";"cryptoq.q"];
 
+bmxapispec:.j.k first read0 `:swagger.json
+
 // TODO - test flag on by default and print live banner
-settings:`apiHost`apiKey`apiSecret!("testnet.bitmex.com";apikey;secret)
+settings:`apiProtocol`apiHost`apiKey`apiSecret`apiBasePath!("https://";"testnet.bitmex.com";apikey;secret;bmxapispec[`basePath],"/")
 //settings:`apiHost`apiKey`apiSecret!("www.bitmex.com";apikey;secret)
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -138,6 +140,17 @@ ps:{
 neworder:{[orders]
   if[99 = type orders;orders:enlist orders];
   :restapi[settings`apiHost;"POST";"/api/v1/order/bulk";.j.j enlist[`orders]!enlist orders;settings`apiKey;settings`apiSecret];
+  }
+
+\l ../lib/reQ/req.q
+.req.VERBOSE:1b
+
+restapiv2:{[endpoint;reqtype;data]
+  expires:qtime2unix .z.p+00:00:10.000;
+  sig:signature[settings`apiSecret;reqtype;settings[`apiBasePath],endpoint;expires;data];
+  url:(""sv settings`apiProtocol`apiHost`apiBasePath),endpoint;
+  dhdrs:(`$" "vs"Host api-expires api-key api-signature")!(settings`apiHost;expires;settings`apiKey;sig);
+  :.req.get[url;dhdrs];
   }
 
 ////////////////////////////////////////////////////////////////////////////////
