@@ -1,3 +1,4 @@
+\l order.q
 \l creds.q
 \l utils.q
 
@@ -39,9 +40,10 @@ restapi:{[host;verb;path;data;apiKey;apiSecret]
   :`status`header`body!(-1;`;`)
   ];
 
+ // TODO - improve
  urlpath:urlencode path;
  expires:qtime2unix .z.p+00:00:10.000;
- httpresp:(`$":https://",host) createreq[host;verb;urlpath;apiKey;apiSecret;expires;data];
+ httpresp::(`$":https://",host) httpreq::createreq[host;verb;urlpath;apiKey;apiSecret;expires;data];
  i:first httpresp ss "\r\n\r\n"; headers:i#httpresp;body:(i+4) _ httpresp; 
  status:("J"$" " vs first["\r\n" vs headers])[1]; 
  header:raze{{enlist[`$x 0]!enlist x[1]}": " vs x}each "\r\n" vs "statusline: ",headers; 
@@ -49,6 +51,21 @@ restapi:{[host;verb;path;data;apiKey;apiSecret]
  :`status`header`body!(status;header;body);
  };
 
+restapiv2:{[host;verb;path;data;apiKey;apiSecret]
+ if[not(6#10h)~type each(host;verb;path;data;apiKey;apiSecret);
+  :`status`header`body!(-1;`;`)
+  ];
+
+ // TODO - improve
+ urlpath:urlencode path;
+ expires:qtime2unix .z.p+00:00:10.000;
+ httpresp::(`$":https://",host) httpreq::createreq[host;verb;urlpath;apiKey;apiSecret;expires;data];
+ i:first httpresp ss "\r\n\r\n"; headers:i#httpresp;body:(i+4) _ httpresp; 
+ status:("J"$" " vs first["\r\n" vs headers])[1]; 
+ header:raze{{enlist[`$x 0]!enlist x[1]}": " vs x}each "\r\n" vs "statusline: ",headers; 
+ body:.j.k (i+4) _ httpresp;
+ :`status`header`body!(status;header;body);
+ };
 ////////////////////////////////////////////////////////////////////////////////
 // Public Functions
 ////////////////////////////////////////////////////////////////////////////////
@@ -117,3 +134,32 @@ ps:{
   r:restapi[settings`apiHost;"GET";"/api/v1/position?columns=",.j.j[`symbol`currentQty`avgCostPrice`marginCallPrice`maintMargin`lastPrice`timestamp];"";settings`apiKey;settings`apiSecret];
   :select ltime"Z"$timestamp,`$symbol,`$currency,currentQty,simpleQty,avgCostPrice,marginCallPrice,markPrice,liquidationPrice,maintMargin,lastPrice from r`body;
   };
+
+neworder:{[orders]
+  if[99 = type orders;orders:enlist orders];
+  :restapi[settings`apiHost;"POST";"/api/v1/order/bulk";.j.j enlist[`orders]!enlist orders;settings`apiKey;settings`apiSecret];
+  }
+
+////////////////////////////////////////////////////////////////////////////////
+// BitMEX API
+////////////////////////////////////////////////////////////////////////////////
+
+//r:restapi[settings`apiHost;"GET";"/api/v1/position";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/apiKey?reverse=false";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/chat?count=100&reverse=true";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/announcement";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/announcement/urgent";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/execution";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/execution/tradeHistory";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/funding";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/instrument";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/order";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/orderBook/L2?symbol=XBTUSD";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/quote?symbol=XBTUSD&reverse=true";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/schema";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/schema/websocketHelp";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/stats";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/trade?symbol=XBTUSD&count=5&start=0&startTime=2018-03-01 00:20:00";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/user";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/user/wallet";"";settings`apiKey;settings`apiSecret];r`body
+//r:restapi[settings`apiHost;"GET";"/api/v1/user/walletSummary";"";settings`apiKey;settings`apiSecret];r`body
