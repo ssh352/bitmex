@@ -1,0 +1,9 @@
+[submodule "lib/reQ"]
+	path = lib/reQ
+	url = https://github.com/jonathonmcmurray/reQ.git
+[submodule "lib/ws.q"]
+	path = lib/ws.q
+	url = https://github.com/jonathonmcmurray/ws.q.git
+[submodule "lib/cryptoq"]
+	path = lib/cryptoq
+	url = https://github.com/asatirahul/cryptoq.git
